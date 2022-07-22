@@ -36,29 +36,6 @@ class AddTaskForm extends React.Component {
   }
 }
 
-// function AddTaskForm({onSubmit}) {
-//   const [description, setDescription] = useState('');
-
-//   const handleSubmit = () => {
-//     onSubmit(description);
-//     setDescription('');
-//   };
-
-//   return (
-//     <View style={styles.form}>
-//       <TextInput
-//         value={description}
-//         placeholder="Enter new task description"
-//         onChangeText={setDescription}
-//         style={styles.textInput}
-//       />
-//       <View style={styles.add}>
-//         <Button style={styles.add} onPress={handleSubmit} title="ADD"></Button>
-//       </View>
-//     </View>
-//   );
-// }
-
 const styles = StyleSheet.create({
   form: {
     height: 50,
