@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useCallback} from 'react';
+import React from 'react';
 import {SafeAreaView, View, StyleSheet} from 'react-native';
 import Realm from 'realm';
 
@@ -6,83 +6,90 @@ import Task from './app/models/Task';
 import AddTaskForm from './app/components/AddTaskForm';
 import TaskList from './app/components/TaskList';
 
-const App = () => {
-  const [tasks, setTasks] = useState([]);
-  const realmRef = useRef(null);
-  const subscriptionRef = useRef(null);
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      tasks: [],
+    };
+    this.realmRef = React.createRef();
+    this.subscriptionRef = React.createRef();
+    this.openRealm = this.openRealm.bind(this);
+    this.closeRealm = this.closeRealm.bind(this);
+    this.handleAddTask = this.handleAddTask.bind(this);
+    this.handleDeleteTask = this.handleDeleteTask.bind(this);
+  }
 
-  const openRealm = useCallback(async () => {
+  async openRealm() {
     try {
       const config = {
         schema: [Task.schema],
       };
 
       const realm = await Realm.open(config);
-      realmRef.current = realm;
+      this.realmRef.current = realm;
 
       const tasksResults = realm.objects('Task');
       if (tasksResults?.length) {
-        setTasks(tasksResults);
+        this.setState({tasks: tasksResults});
       }
 
-      subscriptionRef.current = tasksResults;
+      this.subscriptionRef.current = tasksResults;
       tasksResults.addListener(() => {
-        setTasks(realm.objects('Task'));
+        this.setState({tasks: realm.objects('Task')});
       });
     } catch (err) {
       console.error('Error opening realm: ', err.message);
     }
-  }, [realmRef, setTasks]);
+  }
 
-  const closeRealm = useCallback(() => {
-    const subscription = subscriptionRef.current;
+  closeRealm() {
+    const subscription = this.subscriptionRef.current;
     subscription?.removeAllListeners();
-    subscriptionRef.current = null;
+    this.subscriptionRef.current = null;
 
-    const realm = realmRef.current;
+    const realm = this.realmRef.current;
     realm?.close();
-    realmRef.current = null;
-    setTasks([]);
-  }, [realmRef]);
+    this.realmRef.current = null;
+    this.setState({tasks: []});
+  }
 
-  useEffect(() => {
-    openRealm();
+  componentDidMount() {
+    this.openRealm();
+    this.closeRealm();
+  }
 
-    return closeRealm;
-  }, [openRealm, closeRealm]);
+  handleAddTask(description) {
+    // console.log(description);
+    if (!description) {
+      return;
+    }
 
-  const handleAddTask = useCallback(
-    description => {
-      if (!description) {
-        return;
-      }
-
-      const realm = realmRef.current;
-      realm?.write(() => {
-        realm?.create('Task', new Task({description}));
-      });
-    },
-    [realmRef],
-  );
-
-  const handleDeleteTask = useCallback(
-    task => {
-      const realm = realmRef.current;
-      realm?.write(() => {
-        realm?.delete(task);
-      });
-    },
-    [realmRef],
-  );
-  return (
-    <SafeAreaView style={styles.screen}>
-      <View style={styles.content}>
-        <AddTaskForm onSubmit={handleAddTask} />
-        <TaskList tasks={tasks} onDeleteTask={handleDeleteTask} />
-      </View>
-    </SafeAreaView>
-  );
-};
+    const realm = this.realmRef.current;
+    realm?.write(() => {
+      realm?.create('Task', new Task({description}));
+    });
+  }
+  handleDeleteTask(task) {
+    const realm = this.realmRef.current;
+    realm?.write(() => {
+      realm?.delete(task);
+    });
+  }
+  render() {
+    return (
+      <SafeAreaView style={styles.screen}>
+        <View style={styles.content}>
+          <AddTaskForm onSubmit={this.handleAddTask} />
+          <TaskList
+            tasks={this.state.tasks}
+            onDeleteTask={this.handleDeleteTask}
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
+}
 
 const styles = StyleSheet.create({
   screen: {

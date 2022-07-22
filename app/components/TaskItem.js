@@ -1,18 +1,22 @@
 import React from 'react';
 import {View, Text, Pressable, StyleSheet} from 'react-native';
 
-function TaskItem({description, onDelete}) {
-  return (
-    <Pressable onPress={onDelete}>
-      <View style={styles.task}>
-        <View style={styles.descriptionContainer}>
-          <Text numberOfLines={1} style={styles.description}>
-            {description}
-          </Text>
+class TaskItem extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <Pressable onPress={this.props.onDelete}>
+        <View style={styles.task}>
+          <View style={styles.descriptionContainer}>
+            <Text style={styles.description}>{this.props.description}</Text>
+          </View>
         </View>
-      </View>
-    </Pressable>
-  );
+      </Pressable>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
