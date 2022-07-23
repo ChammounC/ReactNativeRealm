@@ -10,7 +10,7 @@ class AddTaskForm extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleSubmit(description) {
+  async handleSubmit(description) {
     // console.log(description);
     this.props.onSubmit(description);
     this.setState({description: ''});

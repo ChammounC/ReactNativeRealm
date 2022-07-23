@@ -56,6 +56,9 @@ class App extends React.Component {
 
   componentDidMount() {
     this.openRealm();
+  }
+
+  componentWillUnmount() {
     this.closeRealm();
   }
 
